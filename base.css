@@ -1,0 +1,91 @@
+/*
+ * Element defaults. Deliberately narrow: only rules all four projects ALREADY
+ * agreed on independently. Opinions they disagree on (h1/h2 sizing, uppercase
+ * headings, mono headings) stay in design.md as guidance rather than shipping
+ * here, because importing this file must never restyle a project's headings
+ * out from under it.
+ */
+
+@layer base {
+
+    /*
+     * Squircle corners. A plain border-radius reads as a "pill with flat
+     * sides" at large radii; superellipse keeps curvature continuous. Still
+     * progressive-enhancement — unsupported engines fall back to the normal
+     * radius with no fallback needed.
+     */
+    * {
+        corner-shape: superellipse(1.333);
+    }
+
+    body {
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans-stack);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-wrap: pretty;
+    }
+
+    h1,
+    h2,
+    h3 {
+        text-wrap: balance;
+    }
+
+    p {
+        line-height: 1.5;
+    }
+
+    a {
+        text-underline-offset: 4px;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    button:hover {
+        cursor: pointer;
+    }
+
+    ::selection {
+        background: var(--foreground-05);
+        color: var(--background);
+    }
+}
+
+/*
+ * Opt-in, because each changes appearance visibly. Apply deliberately rather
+ * than inheriting them by importing this file.
+ */
+@utility no-scrollbar {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@utility thin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--foreground-07) var(--background-05);
+
+    &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--background-05);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--foreground-07);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: var(--foreground-05);
+    }
+}

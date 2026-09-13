@@ -1,0 +1,86 @@
+/*
+ * Keyframes and the animate-* utilities that wrap them.
+ *
+ * NAMING — camelCase, matching kkrll-next, because that is the canonical
+ * project. good-looking/you-live-like-this use kebab-case (fade-in/fade-out)
+ * and alias on migration; see design.md.
+ *
+ * View-transition wiring (::view-transition-old/new) is deliberately NOT here.
+ * Transition names are app-specific, so each project maps these keyframes onto
+ * its own names.
+ *
+ * DISTANCE — translations are 24px throughout. One number, so a fade-in from
+ * any edge travels the same distance and the set stays coherent.
+ */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes fadeInToLeft {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeOutToLeft {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-24px); }
+}
+
+@keyframes fadeInToRight {
+    from { opacity: 0; transform: translateX(-24px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeOutToRight {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(24px); }
+}
+
+@keyframes fadeInFromBottom {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOutToBottom {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(24px); }
+}
+
+@keyframes fadeOutToTop {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-24px); }
+}
+
+@keyframes modalOverlayOpen {
+    from { background-color: transparent; }
+    to { background-color: var(--overlay); }
+}
+
+@keyframes modalOverlayClose {
+    from { background-color: var(--overlay); }
+    to { background-color: transparent; }
+}
+
+@keyframes modalOpen {
+    from { opacity: 0; transform: translateY(24px); backdrop-filter: blur(0); }
+    to { opacity: 1; transform: translateY(0); backdrop-filter: blur(24px); }
+}
+
+@keyframes modalClose {
+    from { opacity: 1; transform: translateY(0); backdrop-filter: blur(24px); }
+    to { opacity: 0; transform: translateY(24px); backdrop-filter: blur(0); }
+}
+
+@layer utilities {
+    .animate-modal-overlay-open { animation: modalOverlayOpen 0.2s ease-out forwards; }
+    .animate-modal-overlay-close { animation: modalOverlayClose 0.2s ease-out forwards; }
+    .animate-modal-open { animation: modalOpen 0.2s ease-out forwards; }
+    .animate-modal-close { animation: modalClose 0.2s ease-out forwards; }
+}

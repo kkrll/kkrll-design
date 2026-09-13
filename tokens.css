@@ -1,0 +1,110 @@
+/*
+ * Colour ramps, type roles and the Tailwind v4 @theme mapping.
+ *
+ * RAMP RULE — the numeric suffix is "how much of the base colour remains":
+ *   -07  70%, closest to the base        -05  50%        -03  30%, furthest
+ * This holds for BOTH ramps, so --background-03 is the furthest from the page
+ * background and --foreground-03 is the faintest text. Read a suffix as
+ * distance from base, never as lightness — under dark mode the hexes invert
+ * but the relationship does not.
+ *
+ * Defaults below are the warm "kkrll" palette. A consuming project overrides
+ * any of them by redeclaring the plain var (NOT the --color-* one) after this
+ * file is imported — see README.
+ */
+
+:root {
+    color-scheme: light;
+
+    --background: #f1eadf;
+    --background-07: #c8c1bb;
+    --background-05: #a6a29e;
+    --background-03: #8a8580;
+
+    --foreground: #171717;
+    --foreground-07: #1f1f20;
+    --foreground-05: #323235;
+    --foreground-03: #4a4a4d;
+
+    /* Translucent counterparts, for insets and hairlines that must let the
+       layer beneath show through. Same ramp rule, 30% alpha. */
+    --background-semi: #f1eadf4d;
+    --background-07-semi: #c8c1bb4d;
+    --background-05-semi: #a6a29e4d;
+
+    --overlay: #0a0a0ab3;
+    --overlay-dark: #0a0a0acc;
+
+    --brand-light: #ffffe3;
+    --brand-dark: #10100e;
+    --brand-text: var(--brand-dark);
+    --brand-bg: var(--brand-light);
+
+    /*
+     * Font ROLES, not families. A project assigns the families — via next/font's
+     * hashed vars, an @font-face name, or nothing at all to accept the system
+     * stack. Never hardcode a family here: doing so shadows next/font's real
+     * hashed name and fails silently.
+     */
+    --font-sans-stack: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono-stack: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --font-serif-stack: Georgia, "Iowan Old Style", Palatino, serif;
+}
+
+.dark {
+    color-scheme: dark;
+
+    --background: #0a0a0a;
+    --background-07: #1f1f20;
+    --background-05: #3d3d3f;
+    --background-03: #565658;
+
+    --foreground: #ededed;
+    --foreground-07: #6b6a69;
+    --foreground-05: #4b4a49;
+    --foreground-03: #3a3938;
+
+    --background-semi: #0a0a0a4d;
+    --background-07-semi: #1f1f204d;
+    --background-05-semi: #3d3d3f4d;
+
+    --overlay: #0a0a0ab3;
+
+    --brand-light: #ceccab;
+    --brand-text: var(--brand-light);
+    --brand-bg: var(--brand-dark);
+}
+
+/*
+ * `inline` is load-bearing: it makes utilities emit the underlying var
+ * (background: var(--background)) instead of var(--color-background), so a
+ * .dark override reaches every utility without regenerating the theme.
+ * Harmless in projects without Tailwind — an unknown at-rule is skipped.
+ */
+@theme inline {
+    --color-background: var(--background);
+    --color-background-07: var(--background-07);
+    --color-background-05: var(--background-05);
+    --color-background-03: var(--background-03);
+
+    --color-background-semi: var(--background-semi);
+    --color-background-07-semi: var(--background-07-semi);
+    --color-background-05-semi: var(--background-05-semi);
+
+    --color-foreground: var(--foreground);
+    --color-foreground-07: var(--foreground-07);
+    --color-foreground-05: var(--foreground-05);
+    --color-foreground-03: var(--foreground-03);
+
+    --color-overlay: var(--overlay);
+    --color-overlay-dark: var(--overlay-dark);
+
+    --color-brand-light: var(--brand-light);
+    --color-brand-dark: var(--brand-dark);
+    --color-brand-text: var(--brand-text);
+    --color-brand-bg: var(--brand-bg);
+
+    --font-sans: var(--font-sans-stack);
+    --font-mono: var(--font-mono-stack);
+    --font-serif: var(--font-serif-stack);
+}

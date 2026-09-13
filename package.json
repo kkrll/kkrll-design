@@ -1,0 +1,24 @@
+{
+  "name": "@kkrll/design",
+  "version": "0.1.0",
+  "description": "Shared design tokens for kkrll projects — colour ramps, type roles, motion.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    "./theme.css": "./theme.css",
+    "./tokens.css": "./tokens.css",
+    "./base.css": "./base.css",
+    "./motion.css": "./motion.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "theme.css",
+    "tokens.css",
+    "base.css",
+    "motion.css",
+    "design.md"
+  ]
+}
