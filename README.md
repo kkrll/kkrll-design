@@ -52,5 +52,5 @@ cd ../kkrll-next && bun link @kkrll/design
 ## Releasing
 
 Consumers pin `github:kkrll/kkrll-design`, which tracks the default branch —
-push to `master` and `bun update @kkrll/design` picks it up. Pin a tag
+push to `main` and `bun update @kkrll/design` picks it up. Pin a tag
 (`github:kkrll/kkrll-design#v0.2.0`) if a project needs to hold back.
