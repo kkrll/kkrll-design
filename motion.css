@@ -24,7 +24,7 @@
     --duration-micro: 80ms;
     --duration-exit: 150ms;
     --duration-enter: 200ms;
-    --duration-slow: 400ms;
+    --duration-slow: 300ms;
 
     /* Decelerate hard, settle soft. The workhorse. */
     --ease-entrance: cubic-bezier(0.32, 0.72, 0, 1);
@@ -109,4 +109,70 @@
     .animate-modal-overlay-close { animation: modalOverlayClose var(--duration-exit) var(--ease-exit) forwards; }
     .animate-modal-open { animation: modalOpen var(--duration-enter) var(--ease-entrance) forwards; }
     .animate-modal-close { animation: modalClose var(--duration-exit) var(--ease-exit) forwards; }
+}
+
+/*
+ * REDUCED MOTION — the §3 policy, implemented once here rather than in every
+ * consumer. Reduce is not remove: travel goes to zero, opacity survives so a
+ * state change is still perceptible, and durations clamp to --duration-micro.
+ *
+ * Redefining a @keyframes inside a media query replaces the earlier
+ * definition wholesale, so every animation built on these names inherits the
+ * policy without touching its call site.
+ */
+@media (prefers-reduced-motion: reduce) {
+    @keyframes fadeInToLeft {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeOutToLeft {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    @keyframes fadeInToRight {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeOutToRight {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    @keyframes fadeInFromBottom {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeOutToBottom {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    @keyframes fadeOutToTop {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    /* Blur is not vestibular, so it stays; only the 24px travel is dropped. */
+    @keyframes modalOpen {
+        from { opacity: 0; backdrop-filter: blur(0); }
+        to { opacity: 1; backdrop-filter: blur(24px); }
+    }
+
+    @keyframes modalClose {
+        from { opacity: 1; backdrop-filter: blur(24px); }
+        to { opacity: 0; backdrop-filter: blur(0); }
+    }
+
+    @layer utilities {
+        .animate-modal-open,
+        .animate-modal-close,
+        .animate-modal-overlay-open,
+        .animate-modal-overlay-close {
+            animation-duration: var(--duration-micro);
+        }
+    }
 }

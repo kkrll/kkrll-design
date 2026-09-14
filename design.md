@@ -194,7 +194,7 @@ Shipped in `motion.css`, so call sites stop hardcoding `0.2s ease-out`:
 | `--duration-micro` | `80ms` | press, hover, colour |
 | `--duration-exit` | `150ms` | anything leaving |
 | `--duration-enter` | `200ms` | anything arriving |
-| `--duration-slow` | `400ms` | page and view transitions |
+| `--duration-slow` | `300ms` | page and view transitions |
 | `--ease-entrance` | `cubic-bezier(.32,.72,0,1)` | arrivals |
 | `--ease-exit` | `cubic-bezier(.4,0,1,1)` | departures |
 | `--ease-micro` | `cubic-bezier(.65,0,.35,1)` | returns to origin |
@@ -275,6 +275,13 @@ Every state change keeps *some* transition, however brief, so the change stays
 perceptible. Write the reduced case as the branch you author, not as an
 afterthought appended to the file.
 
+`motion.css` implements this for every keyframe it ships: under `reduce` the
+travel keyframes are redefined as opacity-only and the `animate-modal-*`
+utilities clamp to `--duration-micro`. Redefining a `@keyframes` inside a media
+query replaces the earlier definition wholesale, so consumers inherit the
+policy without touching their call sites. App-level animation still has to opt
+in for itself.
+
 ---
 
 ## 4. Modern CSS
@@ -305,7 +312,11 @@ unsupported, which is fine, so never gate layout on it.
 
 - **Spacing:** 8px base. `8 / 16 / 24 / 32` covers nearly everything. 24px is
   the default gutter, and matches the motion travel distance.
-- **Radii:** `8px` for controls, `100rem` for pills.
+- **Radii:** `8px` for controls, `24px` for large surfaces (modals, sheets),
+  `100rem` for pills. Nested corners are concentric — an inner radius is the
+  outer radius minus the padding between them, so a `24px` panel with `16px`
+  of padding holds an `8px` child. Anything else reads as a mistake even when
+  nobody can say why.
 - **Corners:** `corner-shape: superellipse(1.333)` globally — continuous
   curvature, closer to a drawn corner than to an arc.
 - **Rules:** hairlines are `--background-05` (or `--foreground-03` on dark
