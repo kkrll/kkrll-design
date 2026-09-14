@@ -13,6 +13,32 @@
  * any edge travels the same distance and the set stays coherent.
  */
 
+/*
+ * DURATION & EASING — named, so call sites stop guessing.
+ *
+ * These live in @theme, so Tailwind also emits `ease-entrance` / `ease-exit`
+ * utilities. The --duration-* names are plain variables (duration-* utilities
+ * take bare values in v4), used as var() in hand-written CSS.
+ */
+@theme {
+    --duration-micro: 80ms;
+    --duration-exit: 150ms;
+    --duration-enter: 200ms;
+    --duration-slow: 400ms;
+
+    /* Decelerate hard, settle soft. The workhorse. */
+    --ease-entrance: cubic-bezier(0.32, 0.72, 0, 1);
+    /* Accelerate away — exits should not linger. */
+    --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+    /* Symmetric, for colour and press states that return to where they were. */
+    --ease-micro: cubic-bezier(0.65, 0, 0.35, 1);
+    /* Hand-tuned overshoot. Rare by design: one per screen, at most. */
+    --ease-spring: linear(
+        0, 0.006, 0.025, 0.101, 0.539, 0.826, 0.946,
+        1.001, 1.017, 1.014, 1.004, 0.999, 1
+    );
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -79,8 +105,8 @@
 }
 
 @layer utilities {
-    .animate-modal-overlay-open { animation: modalOverlayOpen 0.2s ease-out forwards; }
-    .animate-modal-overlay-close { animation: modalOverlayClose 0.2s ease-out forwards; }
-    .animate-modal-open { animation: modalOpen 0.2s ease-out forwards; }
-    .animate-modal-close { animation: modalClose 0.2s ease-out forwards; }
+    .animate-modal-overlay-open { animation: modalOverlayOpen var(--duration-enter) var(--ease-entrance) forwards; }
+    .animate-modal-overlay-close { animation: modalOverlayClose var(--duration-exit) var(--ease-exit) forwards; }
+    .animate-modal-open { animation: modalOpen var(--duration-enter) var(--ease-entrance) forwards; }
+    .animate-modal-close { animation: modalClose var(--duration-exit) var(--ease-exit) forwards; }
 }
