@@ -8,12 +8,14 @@ The shared visual language behind `kkrll-next`, `good-looking`,
 
 ## 0. Principles
 
-Six rules. Everything below is an application of one of them.
+Seven rules. Everything below is an application of one of them.
 
 **Structure comes from alignment and hairlines, not from containers.**
 A rule, a gutter and a consistent baseline do the work a card with a shadow
 pretends to do. Reach for a border before a background; reach for a background
-before a shadow; do not reach for a shadow. 
+before a shadow; do not reach for a shadow — *for structure*. Shadow is
+material, not hierarchy: it belongs inside the footprint of a thing you touch,
+and nowhere else (§6.6). 
 
 **The page is a document, not an application.**
 Numbered sections, page furniture, label-left/value-right rows, dot leaders,
@@ -39,6 +41,51 @@ The four projects agree on colour, rhythm and timing. They disagree on almost
 everything else, and forcing agreement would cost more than the duplication
 saves.
 
+**Controls that act on the same thing are one object.**
+A group gets one outline, one container, one place on the page. Three keys with
+three edges and three drops are three decisions the reader has to make; one
+bank is none. Scattering related controls is the most common way a screen goes
+wrong while every element on it passes.
+
+### When they conflict
+
+They do conflict — "prefer the platform" and "motion explains" disagree the
+moment you want a menu to grow from the button that opened it, and
+`@starting-style` has no opinion about `transform-origin`. Resolve in this
+order, and stop at the first one that settles it:
+
+1. **Correct and reachable.** Contrast, focus, keyboard, reduced motion. Never
+   traded against anything below.
+2. **The platform.** If CSS or an HTML element does it, that wins over a
+   hand-rolled version that matches the principle more closely.
+3. **The principle.** The seven above, in any order — they rarely fight.
+4. **Consistency with the other three projects.** Real, but it loses to all of
+   the above. Tokens are the contract; matching implementations are not.
+5. **The reference board.** §6 is a mood, not a mandate. It lost once already
+   (it argues for more monospace than most of these projects should use).
+
+### Invariants
+
+The principles above are prose, and prose can be agreed with while being
+violated — every control on a ruined screen can pass every rule in this
+document individually. These are the same rules stated as counts, so that a
+violation is a thing you can point at, and mostly a thing you can grep for.
+
+- **One control language.** Every button in an app is the same object. If you
+  can point at two, the older one is a bug, not a legacy.
+- **One type scale.** A size that is not on the scale means the scale was
+  wrong, not that this case is special.
+- **One focus signal per element.** Visible (§7), and singular.
+- **One accent, used once** (§6.5). **One hairline weight** (§5). **Two
+  grounds** (§0).
+- **No literal colour.** Every colour is a token. A raw palette class —
+  `text-red-500`, `#4ade80` — is the tell, and it greps.
+
+**Half a migration is worse than none.** Two languages living in one view is
+the failure no element-level rule catches: each control passes, the screen
+fails, and the second language is now load-bearing for whoever arrives next.
+Convert a view completely, or leave it alone and say which it is.
+
 ---
 
 ## 1. Colour
@@ -61,13 +108,41 @@ retains 30% and sits furthest.
 | `--background-03` | 30% | strong rules, wells |
 
 Read a suffix as **distance from base, never as lightness.** Under `.dark` the
-hexes invert but every relationship holds, which is the entire point: a
-component authored against `-07` stays correct in both themes without a single
-dark-mode override.
+hexes invert but every *relationship* holds, which is the entire point: a
+component authored against `-07` keeps its place in the hierarchy in both
+themes without a single dark-mode override.
 
 > **Known inconsistency.** `good-looking` and `you-live-like-this` invert this
 > on the *background* ramp only — there `-05` (`#f5f5f5`) sits closer to base
 > than `-07` (`#e5e5e5`). Their foreground ramps are correct. Fix on migration.
+
+### Contrast floors
+
+The relationship survives the theme flip. **The contrast ratio does not** — and
+because a suffix encodes distance rather than lightness, you cannot read
+legibility off a token name. Measured against each theme's own `--background`:
+
+| Token | Light | Dark | Safe for |
+|---|---|---|---|
+| `--foreground` | 15.0:1 | 16.9:1 | anything |
+| `--foreground-07` | 13.8:1 | **3.7:1** | light: anything. dark: **large text only** (≥24px, or ≥19px bold) |
+| `--foreground-05` | 10.7:1 | **2.2:1** | light: anything. dark: **non-text only** |
+| `--foreground-03` | 7.4:1 | **1.7:1** | light: body text. dark: **hairlines only** |
+
+The light ramp clears AAA at every step. The dark ramp is compressed hard at
+the faint end, so the rule is asymmetric and there is no way to make it
+otherwise without changing the hexes:
+
+- **Body text in dark mode is `--foreground` or `--foreground-07`.** Nothing
+  fainter, regardless of how it reads on the light side.
+- **`-05` and `-03` are structure in dark mode**, not text. Placeholder text at
+  1.7:1 is not low-emphasis, it is absent.
+- Background steps are all under 3:1 against the ground in both themes, by
+  design — they are surfaces and hairlines. Never put text on `-07` and assume
+  the ramp protects you; check against the surface, not the page.
+
+When a design wants faint text on dark, change the *size or weight*, not the
+step.
 
 ### Palette
 
@@ -173,8 +248,10 @@ Headings differ enough between projects that `base.css` deliberately sets
 neither their size nor their case. The house style, where you want it:
 
 - **Uppercase mono** for small labels, metadata and `h2`/`h3` — in the projects
-  where mono is *not* the primary voice. Where it is, labels need a different
-  signal (weight, case, rule) or everything flattens.
+  where mono is *not* the primary voice. Where it **is**, the signal is
+  material and position rather than case — a label is ink on the ground, a
+  control is a key — and the app sets lowercase throughout. Case alone cannot
+  separate a label from mono content, because the content is already mono.
 - **Sentence case** for `h1` and body.
 - Secondary text = `--foreground-07`, `0.875rem`, uppercase.
 - **Tabular figures** (`font-variant-numeric: tabular-nums`) on anything in a
@@ -301,10 +378,9 @@ something one of the four projects currently does by hand.
 | `light-dark()` | a duplicated `.dark` block *for one-off values only* |
 
 Two cautions. `light-dark()` reads `color-scheme`, not `.dark`, so it will
-**not** follow a class toggle on a subtree — keep it out of `tokens.css` and
-use it only for local values. And `corner-shape: superellipse(1.333)` is
-progressive enhancement: it degrades to plain `border-radius` where
-unsupported, which is fine, so never gate layout on it.
+**not** follow a class toggle on a subtree — local values only, never
+`tokens.css`. And `corner-shape` degrades silently to plain `border-radius`,
+so never gate layout on it.
 
 ---
 
@@ -338,25 +414,91 @@ unsupported, which is fine, so never gate layout on it.
 
 ### The board
 
-`references/` holds the visual source. What it argues, in order of how strongly
-it argues it:
+`references/` holds the visual source. What it argues, strongest first:
 
-1. **Monospace as a full voice, where the subject earns it.** Mono setting
-   whole pages rather than code and labels (Snelling, ACRE, the receipt,
-   Detroit Underground, the Nothing quick-start guide). The board is heavier on
-   mono than most of these projects should be — read it as an available
-   register, not a default. See §2.
-2. **The printed document.** Section numbers (`00.0`, `01.1`), page numbers,
-   dot leaders, asterisk rules, contents pages. Furniture that says a thing was
-   *typeset*.
-3. **Data as ornament.** Coordinates, FCC IDs, durations, slot numbers,
-   specifications — set as decoration, aligned in columns, never hidden behind
-   a "details" toggle.
-4. **Warm paper or near-black.** Both poles present, nothing between them.
-5. **One accent, used once.** A single red dot, a red playhead, burnt-orange
-   plotter lines on cream. Accent is punctuation, not a palette.
-6. **Softness only at the controls.** Full-radius pills and blur belong to
-   things you touch; everything structural stays square and ruled.
+1. **Monospace as a full voice** — setting whole pages, not just code and
+   labels. The board is heavier on mono than most of these projects should be;
+   an available register, not a default. See §2.
+2. **The printed document** — section numbers, page numbers, dot leaders,
+   asterisk rules. Furniture that says a thing was *typeset*.
+3. **Data as ornament** — coordinates, FCC IDs, durations, specifications, set
+   as decoration and aligned in columns. Never behind a "details" toggle.
+4. **Warm paper or near-black**, nothing between.
+5. **One accent, used once.** Punctuation, not a palette.
+6. **Softness only at the controls.** Pills and blur belong to things you
+   touch; structure stays square and ruled.
+
+---
+
+## 7. Accessible by default
+
+Most of this is free if you take "prefer the platform" (§0) seriously — the platform
+ships focus management, semantics and keyboard handling, and every hand-rolled
+replacement loses some of it.
+
+- **Contrast** — see §1. The dark ramp is the one that bites.
+- **Focus must be visible.** Never `outline: none` without a replacement.
+  `:focus-visible` gives keyboard users a ring and leaves mouse users alone;
+  that is the whole reason it exists, so there is no reason to suppress it.
+- **Elements before roles.** `<button>`, `<dialog>`, `<nav>`, `<a href>`. A
+  `<div role="button" tabIndex={0} onKeyDown={…}>` is four things to get wrong
+  in place of one that is already right — and `role="dialog"` + `aria-modal`
+  on a `<div>` still gives you no top layer, no focus trap and no inert
+  background, all of which `showModal()` hands over for free.
+- **Headings are an outline, not a size picker.** Never skip a level to get
+  smaller text. `base.css` sets no heading sizes precisely so this stays a
+  markup decision.
+- **Hit targets** are 44px minimum on touch, padding included.
+- **Reduced motion** — see §3. Reduce, do not remove.
+- **Never colour alone.** State that is only a hue is state some readers do not
+  have; pair it with an icon, a rule, weight or position.
+
+---
+
+## 8. What ships
+
+`theme.css` is the barrel; `tokens.css` alone works without Tailwind.
+
+| | |
+|---|---|
+| **Colour** | `--background` / `--foreground` × `-07` `-05` `-03`; `--background-semi`, `--background-07-semi`, `--background-05-semi`; `--overlay`, `--overlay-dark`; `--brand-light`, `--brand-dark`, `--brand-text`, `--brand-bg` |
+| **Type roles** | `--font-sans-stack`, `--font-mono-stack`, `--font-serif-stack` → `font-sans` / `font-mono` / `font-serif` |
+| **Motion** | `--duration-micro` `-exit` `-enter` `-slow`; `--ease-entrance` `-exit` `-micro` `-spring` |
+| **Keyframes** | `fadeIn`, `fadeOut`, `fadeInFromBottom`, `fadeOutToBottom`, `fadeOutToTop`, `fadeInToLeft`, `fadeOutToLeft`, `fadeInToRight`, `fadeOutToRight`, `modalOpen`, `modalClose`, `modalOverlayOpen`, `modalOverlayClose` |
+| **Utilities** | `animate-modal-open` / `-close` / `-overlay-open` / `-overlay-close`; `no-scrollbar`, `thin-scrollbar` |
+| **Base elements** | `body`, `p`, `a`, `h1`–`h3` (`text-wrap` only), `button:hover`, `::selection`, global `corner-shape` |
+
+Keyframes are shipped bare and unbound — the **names** of view transitions are
+app-specific, so mapping them is each project's job (§3). Check this table
+before writing another `fadeIn`.
+
+> Tailwind v4 tree-shakes unused `@theme` variables. A token you reference only
+> from JS or a template string will not be in the output; one plain
+> `var(--token)` anywhere in your CSS keeps it alive.
+
+---
+
+## 9. Rejected
+
+Not stylistic preferences — each is something one of these projects shipped,
+and each has a replacement above.
+
+| Don't | Because | Instead |
+|---|---|---|
+| `shadow-2xl`, or any shadow for structure | Depth is not hierarchy | A hairline (§0) |
+| `rounded-[56px]`, `rounded-[44px]` | Off-grid, and breaks nesting | 8 / 24 / `100rem` (§5) |
+| `duration-300`, `ease-out` at call sites | Retuning means grepping | Motion tokens (§3) |
+| `setTimeout` matched to a CSS duration | Two sources of truth; they drift | `onAnimationEnd` / `transitionend` |
+| Hand-built modals, dropdowns, tooltips | Loses the top layer, focus trap, Escape | `<dialog>`, `popover` (§4) |
+| `role="button"` on a `<div>` | Reimplements `<button>`, worse | The element (§7) |
+| Lining figures in a column of numbers | Columns fail to align; reads rendered | `tabular-nums` (§2) |
+| Faint text via `-05` / `-03` on dark | 2.2:1 and 1.7:1 — not low-emphasis, gone | Change size or weight (§1) |
+| Introducing a token inside `.dark` | Invalid-at-computed-value in light: the fill silently does not paint, while the ink chosen *for* it stays — white on white | `:root` declares, `.dark` only overrides (§1) |
+| `aria-pressed` for a filled look on a one-shot action | Announces a switch that never switches | A class, and a timer (§7) |
+| React state that only toggles a class | The platform already tracks it | `:has()`, `@starting-style` (§4) |
+| Entrance animation on first paint | Delays content to decorate it | Animate on change (§3) |
+| A second hairline weight | Hierarchy wanted space, not another rule | Space (§5) |
+| Mid-grey grounds | Belongs to no one | Two grounds (§0) |
 
 ---
 
