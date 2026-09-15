@@ -12,6 +12,7 @@
     "./tokens.css": "./tokens.css",
     "./base.css": "./base.css",
     "./motion.css": "./motion.css",
+    "./design.md": "./design.md",
     "./package.json": "./package.json"
   },
   "files": [

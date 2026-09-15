@@ -8,7 +8,7 @@ The shared visual language behind `kkrll-next`, `good-looking`,
 
 ## 0. Principles
 
-Seven rules. Everything below is an application of one of them.
+Eight rules. Everything below is an application of one of them.
 
 **Structure comes from alignment and hairlines, not from containers.**
 A rule, a gutter and a consistent baseline do the work a card with a shadow
@@ -30,6 +30,11 @@ never to drift toward the middle.
 **Motion explains, it does not perform.**
 Every animation answers "where did this come from?" or "what just changed?"
 If it answers neither, delete it. See §3.
+
+**Responsiveness is perceived, not measured.**
+A gap where the browser can paint is worth more than finishing sooner. Show the
+result of the last user action first — all other work can wait. Throughput is
+not the goal; the appearance of an answer is. See §3.
 
 **Prefer the platform.**
 If CSS can express it, CSS should express it — state, transitions, layout
@@ -58,7 +63,7 @@ order, and stop at the first one that settles it:
    traded against anything below.
 2. **The platform.** If CSS or an HTML element does it, that wins over a
    hand-rolled version that matches the principle more closely.
-3. **The principle.** The seven above, in any order — they rarely fight.
+3. **The principle.** The eight above, in any order — they rarely fight.
 4. **Consistency with the other three projects.** Real, but it loses to all of
    the above. Tokens are the contract; matching implementations are not.
 5. **The reference board.** §6 is a mood, not a mandate. It lost once already
@@ -305,6 +310,21 @@ decorate its arrival. Animate on *change* — route, state, interaction.
 need height, `interpolate-size: allow-keywords` lets `height: auto` transition
 without the JS measurement dance.
 
+It is also the only motion that survives a busy main thread. `transform` and
+`opacity` animate on the compositor, so they keep running while JavaScript
+blocks; anything driven by a JS tick freezes with it. In an app that does real
+work — a shader pass, a canvas redraw, a parse — that is the difference between
+a slow screen and a broken one. Compositor motion is the rule, not the tuning.
+
+**One paint per frame.** The budget is roughly 10ms of the 16.6ms at 60Hz, and
+half that at 120Hz. Coalesce high-frequency updates — pointer moves, socket
+messages, keystrokes — behind a scheduled flag and paint once; never call
+`render()` per incoming event. And when a long task has to run *while something
+is animating*, split it by time rather than by count: measure
+`performance.now()` against the frame start and yield with
+`requestAnimationFrame`, so the split tracks the frame instead of guessing at
+it.
+
 ### Mechanics
 
 Enter *and* exit in pure CSS, no mount flag:
@@ -495,6 +515,7 @@ and each has a replacement above.
 | Faint text via `-05` / `-03` on dark | 2.2:1 and 1.7:1 — not low-emphasis, gone | Change size or weight (§1) |
 | Introducing a token inside `.dark` | Invalid-at-computed-value in light: the fill silently does not paint, while the ink chosen *for* it stays — white on white | `:root` declares, `.dark` only overrides (§1) |
 | `aria-pressed` for a filled look on a one-shot action | Announces a switch that never switches | A class, and a timer (§7) |
+| `render()` / `update()` per incoming event | Many paints inside one frame | Coalesce behind a scheduled flag (§3) |
 | React state that only toggles a class | The platform already tracks it | `:has()`, `@starting-style` (§4) |
 | Entrance animation on first paint | Delays content to decorate it | Animate on change (§3) |
 | A second hairline weight | Hierarchy wanted space, not another rule | Space (§5) |
