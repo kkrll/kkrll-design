@@ -1,8 +1,12 @@
 # design.md
 
 The shared visual language behind `kkrll-next`, `good-looking`,
-`you-live-like-this` and `dbd`. Code lives in `tokens.css` / `base.css` /
-`motion.css`. This file is the *why* — the part that survives a rewrite.
+`you-live-like-this` and `dbd`. This file is the *why* — the part that
+survives a rewrite. The code is `@kkrll/design`
+([github.com/kkrll/kkrll-design](https://github.com/kkrll/kkrll-design)):
+`bun add github:kkrll/kkrll-design`, then `@import "@kkrll/design/theme.css"`
+after Tailwind — or `tokens.css` alone without it. The
+[README](https://github.com/kkrll/kkrll-design#readme) has the details.
 
 ---
 
@@ -524,4 +528,4 @@ and each has a replacement above.
 ---
 
 Migration notes for the individual projects live in the
-[README](./README.md#migration).
+[README](https://github.com/kkrll/kkrll-design#migration).
