@@ -38,7 +38,12 @@
     --brand-text: var(--brand-dark);
     --brand-bg: var(--brand-light);
 
-    /* One per project, used sparingly. Override it; this default is no accent. */
+    /*
+     * One per project, used sparingly. Override it; this default is no accent.
+     * Deliberately NOT mapped to --color-accent: shadcn uses `accent` for its
+     * hover surface, and a mapping here would switch those classes on. Use
+     * var(--accent), or bg-(--accent) in Tailwind.
+     */
     --accent: var(--foreground);
 
     /*
@@ -140,7 +145,6 @@
     --color-brand-dark: var(--brand-dark);
     --color-brand-text: var(--brand-text);
     --color-brand-bg: var(--brand-bg);
-    --color-accent: var(--accent);
 
     --font-sans: var(--font-sans-stack);
     --font-mono: var(--font-mono-stack);
