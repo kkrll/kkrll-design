@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * kkrll-check — the design.md rules that can be found by reading source.
+ * kkrll-check — the design.md floor, found by reading source.
  *
  *     bunx kkrll-check [paths…]        default: src
  *
@@ -8,7 +8,8 @@
  * found. A line is exempt only with a reason: `kkrll-ignore: <why>`, and
  * every exemption is counted in the summary (`--exempt` lists them).
  * Positive letter-spacing cannot be exempted at all.
- * What this cannot see is listed in design.md §6.
+ * Only floor rules (colour, tracking, icons) fail the run; the rest are
+ * printed as things to reconsider and leave the exit code alone.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
@@ -59,6 +60,14 @@ const LINE_RULES = [
     // token (`--x: #fff`) is how a palette is defined, so it is allowed.
     skip: /^\s*--[\w-]+\s*:/,
     re: /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab)\(/g,
+    // `#feed {` and `#bad,` are id selectors, not colours.
+    keep: (m, text) => {
+      if (!m[0].startsWith("#")) return true;
+      const after = text.slice(m.index);
+      const before = text.slice(0, m.index);
+      if (/^[^;]*\{\s*$/.test(after)) return false;
+      return !(/^[^;:]*,\s*$/.test(after) && !before.includes(":"));
+    },
   },
   {
     id: "radius",
@@ -214,7 +223,10 @@ for (const root of roots.length ? roots : ["src"]) {
       for (const rule of LINE_RULES) {
         if (!rule.files.some((set) => set.has(ext))) continue;
         if (rule.skip?.test(text)) continue;
-        for (const m of text.matchAll(rule.re)) report(i + 1, rule.id, m[0].trim());
+        for (const m of text.matchAll(rule.re)) {
+          if (rule.keep && !rule.keep(m, text)) continue;
+          report(i + 1, rule.id, m[0].trim());
+        }
       }
       checkTracking(text, ext, (match, hard) => report(i + 1, "tracking", match, hard));
     });
@@ -222,16 +234,28 @@ for (const root of roots.length ? roots : ["src"]) {
   }
 }
 
-for (const f of findings) console.log(`${f.file}:${f.line}  ${f.rule.padEnd(10)}  ${f.text}`);
+const ADVISORY = new Set(["type-scale", "radius", "shadow", "motion"]);
+const floor = findings.filter((f) => !ADVISORY.has(f.rule));
+const advisory = findings.filter((f) => ADVISORY.has(f.rule));
+const line = (f) => `${f.file}:${f.line}  ${f.rule.padEnd(10)}  ${f.text}`;
+const tally = (list) =>
+  Object.entries(Object.groupBy(list, (f) => f.rule))
+    .map(([rule, l]) => `${rule} ${l.length}`)
+    .join(" · ");
+
+for (const f of floor) console.log(line(f));
+if (advisory.length) {
+  if (floor.length) console.log("");
+  console.log("reconsider:");
+  for (const f of advisory) console.log(`  ${line(f)}`);
+}
 if (listExempt) {
   for (const e of exempt) console.log(`${e.file}:${e.line}  exempt      ${e.rule}: ${e.why}`);
 }
-const exemptNote = exempt.length ? ` ${exempt.length} exempt${listExempt ? "" : " (--exempt to list)"}.` : "";
-if (!findings.length && exemptNote) console.log(exemptNote.trim());
-if (findings.length) {
-  const byRule = Object.entries(Object.groupBy(findings, (f) => f.rule))
-    .map(([rule, list]) => `${rule} ${list.length}`)
-    .join(" · ");
-  console.log(`\n${findings.length} found — ${byRule}.${exemptNote} Rules: design.md §0.`);
-  process.exit(1);
-}
+
+const parts = [];
+if (floor.length) parts.push(`${floor.length} below the floor — ${tally(floor)}`);
+if (advisory.length) parts.push(`${advisory.length} to reconsider — ${tally(advisory)}`);
+if (exempt.length) parts.push(`${exempt.length} exempt${listExempt ? "" : " (--exempt to list)"}`);
+if (parts.length) console.log(`\n${parts.join(". ")}. See design.md, Floor.`);
+if (floor.length) process.exit(1);

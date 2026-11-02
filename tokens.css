@@ -38,6 +38,9 @@
     --brand-text: var(--brand-dark);
     --brand-bg: var(--brand-light);
 
+    /* One per project, used sparingly. Override it; this default is no accent. */
+    --accent: var(--foreground);
+
     /*
      * Font ROLES, not families. Never hardcode a family here: it shadows
      * next/font's hashed name and fails silently.
@@ -137,6 +140,7 @@
     --color-brand-dark: var(--brand-dark);
     --color-brand-text: var(--brand-text);
     --color-brand-bg: var(--brand-bg);
+    --color-accent: var(--accent);
 
     --font-sans: var(--font-sans-stack);
     --font-mono: var(--font-mono-stack);

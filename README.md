@@ -1,7 +1,7 @@
 # @kkrll/design
 
 Shared design tokens for the kkrll projects. CSS only — no build, no runtime,
-no components. See **[design.md](./design.md)** for the rules behind it.
+no components. See **[design.md](./design.md)** for how to design with it.
 
 ## Install
 
@@ -44,16 +44,18 @@ Order matters: **after** `tailwindcss`, **before** your overrides.
 | `tokens.css` | Colour ramps, type scale, font roles, motion timing, `@theme` mapping |
 | `base.css` | Element defaults + `no-scrollbar` / `thin-scrollbar` utilities |
 | `motion.css` | Keyframes, `animate-modal-*` utilities, reduced-motion policy |
-| `bin/check.js` | `kkrll-check` — finds design.md §0 violations |
-| `references/` | Visual source for the house style (see design.md §7) |
+| `bin/check.js` | `kkrll-check` — finds design.md floor violations |
+| `references/` | The mood board. For people — not agent input |
 
 ## Check
 
 ```bash
-bunx kkrll-check src        # file:line rule text; exits 1 on any finding
+bunx kkrll-check src        # file:line rule text; exits 1 only below the floor
 ```
 
-Run it at the end of every pass, not just in review. Exempt a line only with a
+Colour, tracking and icon findings fail the run. Off-scale sizes, radii,
+shadows and call-site motion are listed under `reconsider:` and don't.
+Exempt a line only with a
 reason: `kkrll-ignore: <why>`; `--exempt` lists every exemption. Positive
 letter-spacing cannot be exempted.
 
