@@ -45,13 +45,14 @@
         text-decoration: underline;
     }
 
-    button:hover {
+    button:not(:disabled):hover {
         cursor: pointer;
     }
 
+    /* 7:1 light, 9:1 dark. An inverted fill measured 2.2:1 on dark. */
     ::selection {
-        background: var(--foreground-05);
-        color: var(--background);
+        background: var(--background-05);
+        color: var(--foreground);
     }
 }
 

@@ -1,16 +1,15 @@
 /*
- * Colour ramps, type roles and the Tailwind v4 @theme mapping.
+ * Colour ramps, type scale, motion timing, and the Tailwind v4 @theme mapping.
  *
  * RAMP RULE — the numeric suffix is "how much of the base colour remains":
  *   -07  70%, closest to the base        -05  50%        -03  30%, furthest
- * This holds for BOTH ramps, so --background-03 is the furthest from the page
- * background and --foreground-03 is the faintest text. Read a suffix as
- * distance from base, never as lightness — under dark mode the hexes invert
- * but the relationship does not.
+ * Read a suffix as distance from base, never as lightness or legibility —
+ * contrast per step is in design.md §2.
  *
- * Defaults below are the warm "kkrll" palette. A consuming project overrides
- * any of them by redeclaring the plain var (NOT the --color-* one) after this
- * file is imported — see README.
+ * Every token is a plain :root var first, so projects without Tailwind (dbd)
+ * get all of it. @theme inline then exposes them as utilities. A consuming
+ * project overrides by redeclaring the plain var (NOT the --color-* one) after
+ * this file is imported.
  */
 
 :root {
@@ -26,8 +25,7 @@
     --foreground-05: #323235;
     --foreground-03: #4a4a4d;
 
-    /* Translucent counterparts, for insets and hairlines that must let the
-       layer beneath show through. Same ramp rule, 30% alpha. */
+    /* Same steps at 30% alpha, for insets and hairlines over another layer. */
     --background-semi: #f1eadf4d;
     --background-07-semi: #c8c1bb4d;
     --background-05-semi: #a6a29e4d;
@@ -41,16 +39,52 @@
     --brand-bg: var(--brand-light);
 
     /*
-     * Font ROLES, not families. A project assigns the families — via next/font's
-     * hashed vars, an @font-face name, or nothing at all to accept the system
-     * stack. Never hardcode a family here: doing so shadows next/font's real
-     * hashed name and fails silently.
+     * Font ROLES, not families. Never hardcode a family here: it shadows
+     * next/font's hashed name and fails silently.
      */
     --font-sans-stack: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --font-mono-stack: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     --font-serif-stack: Georgia, "Iowan Old Style", Palatino, serif;
+
+    /*
+     * TYPE SCALE — five sizes, nothing else. Tracking is 0 except display.
+     * Fixed in rem: interface text should not change with the window, and rem
+     * follows the reader's font-size setting and zoom. Only display is fluid —
+     * 24px at a 400px window, 32px from 900px — and its middle term keeps a
+     * rem part, because a vw-only size stops growing when the reader zooms.
+     */
+    --text-micro: 0.625rem;
+    --text-micro--line-height: 1.4;
+    --text-control: 0.75rem;
+    --text-control--line-height: 1.4;
+    --text-ui: 0.875rem;
+    --text-ui--line-height: 1.5;
+    --text-lead: 1rem;
+    --text-lead--line-height: 1.5;
+    --text-display: clamp(1.5rem, 1.1rem + 1.6vw, 2rem);
+    --text-display--line-height: 1.1;
+    --text-display--letter-spacing: -0.02em;
+
+    /* MOTION — exits faster than entrances. */
+    --duration-micro: 80ms;
+    --duration-exit: 150ms;
+    --duration-enter: 200ms;
+    --duration-slow: 300ms;
+
+    /* Decelerate hard, settle soft. The workhorse. */
+    --ease-entrance: cubic-bezier(0.32, 0.72, 0, 1);
+    /* Accelerate away — exits should not linger. */
+    --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+    /* Symmetric, for colour and press states that return to where they were. */
+    --ease-micro: cubic-bezier(0.65, 0, 0.35, 1);
+    /* Hand-tuned overshoot. One per screen, at most. */
+    --ease-spring: linear(
+        0, 0.006, 0.025, 0.101, 0.539, 0.826, 0.946,
+        1.001, 1.017, 1.014, 1.004, 0.999, 1
+    );
 }
 
+/* Overrides only. A token introduced here is invalid in light mode. */
 .dark {
     color-scheme: dark;
 
@@ -68,18 +102,18 @@
     --background-07-semi: #1f1f204d;
     --background-05-semi: #3d3d3f4d;
 
-    --overlay: #0a0a0ab3;
-
     --brand-light: #ceccab;
     --brand-text: var(--brand-light);
     --brand-bg: var(--brand-dark);
 }
 
 /*
- * `inline` is load-bearing: it makes utilities emit the underlying var
+ * `inline` is load-bearing: utilities emit the underlying var
  * (background: var(--background)) instead of var(--color-background), so a
  * .dark override reaches every utility without regenerating the theme.
- * Harmless in projects without Tailwind — an unknown at-rule is skipped.
+ * Same-name entries (--text-*, --ease-*) are safe: the unlayered :root above
+ * beats the copy Tailwind emits into @layer theme.
+ * Harmless without Tailwind — an unknown at-rule is skipped.
  */
 @theme inline {
     --color-background: var(--background);
@@ -107,4 +141,22 @@
     --font-sans: var(--font-sans-stack);
     --font-mono: var(--font-mono-stack);
     --font-serif: var(--font-serif-stack);
+
+    --text-micro: var(--text-micro);
+    --text-micro--line-height: var(--text-micro--line-height);
+    --text-control: var(--text-control);
+    --text-control--line-height: var(--text-control--line-height);
+    --text-ui: var(--text-ui);
+    --text-ui--line-height: var(--text-ui--line-height);
+    --text-lead: var(--text-lead);
+    --text-lead--line-height: var(--text-lead--line-height);
+    --text-display: var(--text-display);
+    --text-display--line-height: var(--text-display--line-height);
+    --text-display--letter-spacing: var(--text-display--letter-spacing);
+
+    /* Emits ease-entrance etc. Durations have no Tailwind namespace: use var(). */
+    --ease-entrance: var(--ease-entrance);
+    --ease-exit: var(--ease-exit);
+    --ease-micro: var(--ease-micro);
+    --ease-spring: var(--ease-spring);
 }
