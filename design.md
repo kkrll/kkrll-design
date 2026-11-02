@@ -1,341 +1,192 @@
 # design.md
 
-The shared visual language behind `kkrll-next`, `good-looking`,
-`you-live-like-this` and `dbd`. This file is the *why* — the part that
-survives a rewrite. The code is `@kkrll/design`
-([github.com/kkrll/kkrll-design](https://github.com/kkrll/kkrll-design)):
-`bun add github:kkrll/kkrll-design`, then `@import "@kkrll/design/theme.css"`
-after Tailwind — or `tokens.css` alone without it. The
-[README](https://github.com/kkrll/kkrll-design#readme) has the details.
+The shared visual language of `kkrll-next`, `good-looking`,
+`you-live-like-this` and `dbd`. Code: `@kkrll/design`
+([github.com/kkrll/kkrll-design](https://github.com/kkrll/kkrll-design)) —
+install and import in the [README](https://github.com/kkrll/kkrll-design#readme).
+
+**Before building, read §0. Before calling it done, run §6.**
 
 ---
 
-## 0. Principles
+## 0. Rules
 
-Eight rules. Everything below is an application of one of them.
+Every rule is a value or a count, so a violation is something you can point
+at. ✓ = `kkrll-check` finds it.
 
-**Structure comes from alignment and hairlines, not from containers.**
-A rule, a gutter and a consistent baseline do the work a card with a shadow
-pretends to do. Reach for a border before a background; reach for a background
-before a shadow; do not reach for a shadow — *for structure*. Shadow is
-material, not hierarchy: it belongs inside the footprint of a thing you touch,
-and nowhere else (§6.6). 
+### Copy — *every string earns its place*
 
-**The page is a document, not an application.**
-Numbered sections, page furniture, label-left/value-right rows, dot leaders,
-tabular figures. Information should look filed, not dashboarded. When a layout
-decision is ambiguous, ask what a well-set printed page would do.
+1. Delete any string that repeats what is already on screen: a subtitle
+   restating the title, help text under an obvious field, "Welcome to…".
+2. Never explain the interface inside the interface. If it needs a sentence,
+   change the interface.
+3. Labels are 1–3 words, no closing punctuation.
+4. Empty state: one line. Error: one sentence — what happened, what to do.
+5. When unsure, delete.
 
-**Two grounds, nothing in between.**
-Warm paper or near-black. Mid-greys are where the identity goes to die — a
-`#888` background belongs to no one. The ramp exists to move *within* a ground,
-never to drift toward the middle.
+### Type — *one scale, no tracking*
 
-**Motion explains, it does not perform.**
-Every animation answers "where did this come from?" or "what just changed?"
-If it answers neither, delete it. See §3.
+6. Five sizes: `micro` 10 · `control` 12 · `ui` 14 · `lead` 16 ·
+   `display` 24–32. Fixed in rem; only `display` is fluid (§1). Never
+   `text-sm`, never `text-[11px]`, never a `clamp()` of your own. ✓
+7. **Letter-spacing is 0. Never positive — no reason exempts it.** Not on
+   uppercase, not on small labels, not on mono. `text-display` carries its
+   own −0.02em; that is the only tracking in the system. If text looks
+   cramped at 0, the case or size is wrong. ✓
+8. `tabular-nums` on anything in a column.
+9. Headings are an outline. Never skip a level to get a smaller size.
+10. Sentence case. Uppercase only for small mono labels in a project whose
+    voice is not mono (§5) — and at 0 tracking, like everything else.
+11. **Off the scale only when the hierarchy doesn't set the size** — the
+    text belongs to something else on the page: chart ticks and axis labels,
+    labels inside a drawing, slider values, indexes, a preview of a
+    user-chosen size. Declare it once as a named token with its reason, never
+    inline:
+    `--text-tick: 9px; /* kkrll-ignore: plot ticks, one per 9px grid row */`.
+    "Fits", "denser" and "looks better" are not reasons; they mean the layout
+    is wrong. ✓
 
-**Responsiveness is perceived, not measured.**
-A gap where the browser can paint is worth more than finishing sooner. Show the
-result of the last user action first — all other work can wait. Throughput is
-not the goal; the appearance of an answer is. See §3.
+### Icons — *drawn, sized, one grid*
 
-**Prefer the platform.**
-If CSS can express it, CSS should express it — state, transitions, layout
-relationships. A React state variable that exists only to add a class is a bug
-with good manners. See §4.
+12. Inline `<svg>` only. Never a character (`×` `→` `✕` `▾`), an emoji or an
+    icon font. ✓
+13. `viewBox="0 0 24 24"`, rendered at 16, 20 or 24 — set by `width` and
+    `height` attributes, not only CSS. An unsized svg is 300×150 until CSS
+    lands. ✓
+14. 16 beside text, 20 inside a control, 24 alone.
+15. `fill="none" stroke="currentColor" stroke-width="1.5"` — at 16px that is
+    exactly a 1px line, the hairline weight.
+16. `aria-hidden="true"` on the svg; an icon-only button carries
+    `aria-label`. `flex-shrink: 0`.
 
-**Tokens are shared, components are not.**
-The four projects agree on colour, rhythm and timing. They disagree on almost
-everything else, and forcing agreement would cost more than the duplication
-saves.
+### Colour — *two grounds, one accent*
 
-**Controls that act on the same thing are one object.**
-A group gets one outline, one container, one place on the page. Three keys with
-three edges and three drops are three decisions the reader has to make; one
-bank is none. Scattering related controls is the most common way a screen goes
-wrong while every element on it passes.
+17. Every colour is a token. No hex, no `text-red-500`, no `bg-white`. ✓
+18. Warm paper or near-black. No mid-grey ground.
+19. One accent, used once per screen.
+20. Never colour alone — pair state with an icon, weight or position.
+21. Text clears 4.5:1 against the surface it sits on. In dark mode that means
+    `--foreground` for anything under 24px (§2).
 
-### When they conflict
+### Structure — *alignment and hairlines, not containers*
 
-They do conflict — "prefer the platform" and "motion explains" disagree the
-moment you want a menu to grow from the button that opened it, and
-`@starting-style` has no opinion about `transform-origin`. Resolve in this
-order, and stop at the first one that settles it:
+22. Border before background, background before shadow. Shadow only inside
+    something you touch. ✓
+23. One hairline: 1px `--background-05`.
+24. Spacing 8 · 16 · 24 · 32. Gutter 24.
+25. Radii 8 (control) · 24 (surface) · pill. Inner radius = outer − padding.
+    No `rounded-[…]`. ✓
+26. Controls acting on the same thing are one object: one outline, one place.
+27. One control language. If you can point at two kinds of button, the older
+    one is a bug.
 
-1. **Correct and reachable.** Contrast, focus, keyboard, reduced motion. Never
-   traded against anything below.
-2. **The platform.** If CSS or an HTML element does it, that wins over a
-   hand-rolled version that matches the principle more closely.
-3. **The principle.** The eight above, in any order — they rarely fight.
-4. **Consistency with the other three projects.** Real, but it loses to all of
-   the above. Tokens are the contract; matching implementations are not.
-5. **The reference board.** §6 is a mood, not a mandate. It lost once already
-   (it argues for more monospace than most of these projects should use).
+### Motion — *explains, never performs*
 
-### Invariants
+28. Tokens only (§1). No `duration-300`, no `ease-out`. ✓
+29. `transform` and `opacity` only. Never on first paint.
+30. Exits 150ms, entrances 200ms. Motion starts where the user acted —
+    set `transform-origin`.
+31. Interruptible: `transition` for state, `@keyframes` only for motion with
+    no state to return to.
+32. Reduced motion removes travel, keeps opacity at `--duration-micro`.
 
-The principles above are prose, and prose can be agreed with while being
-violated — every control on a ruined screen can pass every rule in this
-document individually. These are the same rules stated as counts, so that a
-violation is a thing you can point at, and mostly a thing you can grep for.
+### Platform — *if CSS or HTML does it, use that*
 
-- **One control language.** Every button in an app is the same object. If you
-  can point at two, the older one is a bug, not a legacy.
-- **One type scale.** A size that is not on the scale means the scale was
-  wrong, not that this case is special.
-- **One focus signal per element.** Visible (§7), and singular.
-- **One accent, used once** (§6.5). **One hairline weight** (§5). **Two
-  grounds** (§0).
-- **No literal colour.** Every colour is a token. A raw palette class —
-  `text-red-500`, `#4ade80` — is the tell, and it greps.
+33. `<button>`, `<dialog>`, `popover`, `<a href>` — never a `role` on a `<div>`.
+34. One visible `:focus-visible` signal per element. Never `outline: none`
+    without a replacement.
+35. Touch targets 44px, padding included.
+36. No React state that only toggles a class — `:has()`, `@starting-style`.
+37. Paint the result of the user's last action first; everything else waits.
+    Coalesce high-frequency events — one paint per frame.
 
-**Half a migration is worse than none.** Two languages living in one view is
-the failure no element-level rule catches: each control passes, the screen
-fails, and the second language is now load-bearing for whoever arrives next.
-Convert a view completely, or leave it alone and say which it is.
+### Conflicts and migration
+
+Resolve in order, stop at the first that settles it: **correct and
+reachable** → **the platform** → **these rules** → **consistency across
+projects** → **the reference board**.
+
+Convert a view completely or leave it alone, and say which. Two languages in
+one view is the failure no single rule catches.
 
 ---
 
-## 1. Colour
+## 1. Scales
 
-### The ramp rule
-
-Every colour is a base plus three steps. **The numeric suffix is how much of
-the base colour remains** — `-07` retains 70% and sits closest to base, `-03`
-retains 30% and sits furthest.
-
-| Token | Retains | Typical use |
-|---|---|---|
-| `--foreground` | 100% | body text, primary ink |
-| `--foreground-07` | 70% | secondary text, captions |
-| `--foreground-05` | 50% | tertiary text, disabled |
-| `--foreground-03` | 30% | hairlines, placeholder |
-| `--background` | 100% | page ground |
-| `--background-07` | 70% | cards, raised surfaces |
-| `--background-05` | 50% | borders, dividers |
-| `--background-03` | 30% | strong rules, wells |
-
-Read a suffix as **distance from base, never as lightness.** Under `.dark` the
-hexes invert but every *relationship* holds, which is the entire point: a
-component authored against `-07` keeps its place in the hierarchy in both
-themes without a single dark-mode override.
-
-> **Known inconsistency.** `good-looking` and `you-live-like-this` invert this
-> on the *background* ramp only — there `-05` (`#f5f5f5`) sits closer to base
-> than `-07` (`#e5e5e5`). Their foreground ramps are correct. Fix on migration.
-
-### Contrast floors
-
-The relationship survives the theme flip. **The contrast ratio does not** — and
-because a suffix encodes distance rather than lightness, you cannot read
-legibility off a token name. Measured against each theme's own `--background`:
-
-| Token | Light | Dark | Safe for |
+| Type | Size | Line | |
 |---|---|---|---|
-| `--foreground` | 15.0:1 | 16.9:1 | anything |
-| `--foreground-07` | 13.8:1 | **3.7:1** | light: anything. dark: **large text only** (≥24px, or ≥19px bold) |
-| `--foreground-05` | 10.7:1 | **2.2:1** | light: anything. dark: **non-text only** |
-| `--foreground-03` | 7.4:1 | **1.7:1** | light: body text. dark: **hairlines only** |
+| `text-micro` | 10px | 1.4 | metadata, counts |
+| `text-control` | 12px | 1.4 | buttons, inputs, labels |
+| `text-ui` | 14px | 1.5 | interface body |
+| `text-lead` | 16px | 1.5 | reading body |
+| `text-display` | 24–32px | 1.1 | one per screen, −0.02em, fluid |
 
-The light ramp clears AAA at every step. The dark ramp is compressed hard at
-the faint end, so the rule is asymmetric and there is no way to make it
-otherwise without changing the hexes:
-
-- **Body text in dark mode is `--foreground` or `--foreground-07`.** Nothing
-  fainter, regardless of how it reads on the light side.
-- **`-05` and `-03` are structure in dark mode**, not text. Placeholder text at
-  1.7:1 is not low-emphasis, it is absent.
-- Background steps are all under 3:1 against the ground in both themes, by
-  design — they are surfaces and hairlines. Never put text on `-07` and assume
-  the ramp protects you; check against the surface, not the page.
-
-When a design wants faint text on dark, change the *size or weight*, not the
-step.
-
-### Palette
-
-The warm **kkrll** palette is the shipped default; other projects override.
-
-| Token | Light | Dark |
+| Motion | Value | For |
 |---|---|---|
-| `--background` | `#f1eadf` | `#0a0a0a` |
-| `--background-07` | `#c8c1bb` | `#1f1f20` |
-| `--background-05` | `#a6a29e` | `#3d3d3f` |
-| `--background-03` | `#8a8580` | `#565658` |
-| `--foreground` | `#171717` | `#ededed` |
-| `--foreground-07` | `#1f1f20` | `#6b6a69` |
-| `--foreground-05` | `#323235` | `#4b4a49` |
-| `--foreground-03` | `#4a4a4d` | `#3a3938` |
-
-`--background-semi`, `--background-07-semi` and `--background-05-semi` are the
-same steps at 30% alpha, for insets and hairlines that must let the layer
-beneath show through. Use these rather than `color-mix()` at call sites, so the
-alpha stays consistent everywhere.
-
-### Deriving a new palette
-
-The shipped hexes are hand-tuned and stay hex. But the ramp rule *is*
-lightness interpolation, so when you need a new palette, derive it in OKLCH and
-paste the results — perceptually even steps, no midtone clumping, and none of
-the guesswork that hand-picking a four-stop ramp involves:
-
-```css
-/* scratch, not shipped */
---l: 92%; --c: 0.018; --h: 76;          /* base: measure with a picker */
---background:    oklch(var(--l) var(--c) var(--h));
---background-07: oklch(calc(var(--l) - 12%) calc(var(--c) * 0.9) var(--h));
---background-05: oklch(calc(var(--l) - 22%) calc(var(--c) * 0.7) var(--h));
---background-03: oklch(calc(var(--l) - 30%) calc(var(--c) * 0.6) var(--h));
-```
-
-Chroma drops as lightness drops, or the steps read as increasingly saturated
-rather than increasingly distant. Compute, eyeball, commit the hex.
-
-### Overriding
-
-Redeclare the **plain** var after importing, never the `--color-*` one — the
-`@theme inline` mapping already points at the plain var, so touching
-`--color-background` breaks the indirection that makes dark mode work.
-
-```css
-@import "tailwindcss";
-@import "@kkrll/design/theme.css";
-
-:root { --background: #ffffff; --background-07: #e5e5e5; }
-.dark { --background: #0a0a0a; }
-```
-
-Dark mode is driven by a `.dark` class, not `prefers-color-scheme`, so the
-theme can be toggled. `.dark` rather than `:root.dark` is deliberate: it
-matches both `<html class="dark">` and a nested `<div class="dark">`, so a
-subtree can be inverted without a second palette.
-
----
-
-## 2. Type
-
-The library ships **roles, not families** — `--font-sans-stack`,
-`--font-mono-stack`, `--font-serif-stack`, mapped to Tailwind's `font-sans` /
-`font-mono` / `font-serif`. Each project assigns real families.
-
-### Choosing a voice
-
-There is no house typeface. The primary voice follows what the project is
-*about*; the other two roles stay available underneath it.
-
-| Project | Subject | Primary voice |
-|---|---|---|
-| `good-looking` (ships as **The Bicycle42**) | Shader image & video editor — passes, parameters, values | **Mono**, widest exposure of the set |
-| `kkrll-next` | Portfolio — writing, projects, posters | **Sans.** Neutral subject, neutral voice |
-| `dbd` | Journal — long reading sessions | **Serif**, set for continuous text |
-| `you-live-like-this` | DSL editor — syntax, tokens, structure | **Mono.** Code is the content |
-
-Mono is a voice, not the default — two of four land there because two of four
-are instruments. It earns exposure where the content is instrumental
-(specifications, parameters, state, syntax, output) and recedes to labels and
-figures where the content is prose. Serif earns it where someone reads for
-minutes rather than scans for seconds.
-
-### Families
-
-| Project | Sans | Serif | Mono |
-|---|---|---|---|
-| kkrll-next | Geist (next/font) | Recia | Geist Mono (next/font) |
-| good-looking | Supreme | Sentient | JetBrains Mono |
-| you-live-like-this | Supreme | Sentient | JetBrains Mono |
-| dbd | Geist (local) | Sentient | JetBrains Mono |
-
-> **next/font trap.** In `kkrll-next`, `--font-geist-sans` is generated by
-> `next/font` with a hashed family name and injected via the class on `<body>`.
-> Never redeclare it in CSS — a hardcoded `"Geist"` silently shadows the real
-> hashed name and you get the fallback, with no error anywhere.
-
-### Conventions (guidance, not shipped CSS)
-
-Headings differ enough between projects that `base.css` deliberately sets
-neither their size nor their case. The house style, where you want it:
-
-- **Uppercase mono** for small labels, metadata and `h2`/`h3` — in the projects
-  where mono is *not* the primary voice. Where it **is**, the signal is
-  material and position rather than case — a label is ink on the ground, a
-  control is a key — and the app sets lowercase throughout. Case alone cannot
-  separate a label from mono content, because the content is already mono.
-- **Sentence case** for `h1` and body.
-- Secondary text = `--foreground-07`, `0.875rem`, uppercase.
-- **Tabular figures** (`font-variant-numeric: tabular-nums`) on anything in a
-  column — prices, dates, counts, coordinates. Non-negotiable; it is most of
-  what makes a data row look typeset rather than rendered.
-
----
-
-## 3. Motion
-
-### Tokens
-
-Shipped in `motion.css`, so call sites stop hardcoding `0.2s ease-out`:
-
-| Token | Value | For |
-|---|---|---|
-| `--duration-micro` | `80ms` | press, hover, colour |
-| `--duration-exit` | `150ms` | anything leaving |
-| `--duration-enter` | `200ms` | anything arriving |
-| `--duration-slow` | `300ms` | page and view transitions |
+| `--duration-micro` | 80ms | press, hover, colour |
+| `--duration-exit` | 150ms | leaving |
+| `--duration-enter` | 200ms | arriving |
+| `--duration-slow` | 300ms | page and view transitions |
 | `--ease-entrance` | `cubic-bezier(.32,.72,0,1)` | arrivals |
 | `--ease-exit` | `cubic-bezier(.4,0,1,1)` | departures |
 | `--ease-micro` | `cubic-bezier(.65,0,.35,1)` | returns to origin |
 | `--ease-spring` | `linear(…)` | one per screen, at most |
 
-Travel distance is **24px**, always — one number, so a fade-in from any edge
-travels the same distance and matches the default gutter.
+`display` is `clamp(1.5rem, 1.1rem + 1.6vw, 2rem)`: 24px at a 400px window,
+32px from 900px. The rest are fixed — interface text that changes with the
+window makes controls jump, and a phone needs the same size, not a smaller
+one. A fluid size keeps a rem term, or it stops growing when the reader zooms.
 
-### Craft
+Travel is 24px, always. All of the above are plain `:root` vars, so `dbd`
+gets them without Tailwind; `text-*` and `ease-*` are also utilities.
 
-**Exits are faster than entrances.** 150ms out, 200ms in. Leaving should get
-out of the way; arriving should feel placed. Easing follows: arrivals
-decelerate into position, departures accelerate away.
+---
 
-**Motion originates where the user acted.** A menu grows from the button that
-opened it, not from the centre of the screen. `transform-origin` is a design
-decision, not a default — set it deliberately or the element appears from
-nowhere and explains nothing.
+## 2. Colour
 
-**Everything must be interruptible.** If a user can close a thing mid-open,
-the close must start from wherever the open got to. This is why transitions
-beat keyframe animations for state: a `transition` interpolates from the
-current computed value for free, a `@keyframes` restarts from `from`. Use
-keyframes only for motion with no state to return to.
+Every colour is a base plus three steps. **The suffix is how much of the base
+remains** — `-07` is closest, `-03` furthest. It is distance, not lightness
+and not legibility: under `.dark` the hexes invert, the contrast does not.
 
-**Never animate on load.** Entrance animations on first paint delay content to
-decorate its arrival. Animate on *change* — route, state, interaction.
+| Token | Light | Dark | Contrast L / D | Use |
+|---|---|---|---|---|
+| `--foreground` | `#171717` | `#ededed` | 15.0 / 16.9 | all text |
+| `--foreground-07` | `#1f1f20` | `#6b6a69` | 13.8 / **3.7** | secondary; dark ≥24px only |
+| `--foreground-05` | `#323235` | `#4b4a49` | 10.7 / **2.2** | dark: non-text only |
+| `--foreground-03` | `#4a4a4d` | `#3a3938` | 7.4 / **1.7** | dark: hairlines only |
+| `--background` | `#f1eadf` | `#0a0a0a` | — | ground |
+| `--background-07` | `#c8c1bb` | `#1f1f20` | 1.5 / 1.2 | raised surface |
+| `--background-05` | `#a6a29e` | `#3d3d3f` | 2.1 / 1.8 | hairlines |
+| `--background-03` | `#8a8580` | `#565658` | 3.1 / 2.7 | strong rules, wells |
 
-**Do not animate layout.** `transform` and `opacity` only. Animating `height`,
-`width`, `top` or `margin` triggers layout on every frame; when you genuinely
-need height, `interpolate-size: allow-keywords` lets `height: auto` transition
-without the JS measurement dance.
+Contrast is against each theme's `--background`. Text on a surface is checked
+against the surface. Faint text on dark: change size or weight, not the step.
 
-It is also the only motion that survives a busy main thread. `transform` and
-`opacity` animate on the compositor, so they keep running while JavaScript
-blocks; anything driven by a JS tick freezes with it. In an app that does real
-work — a shader pass, a canvas redraw, a parse — that is the difference between
-a slow screen and a broken one. Compositor motion is the rule, not the tuning.
+`--background-semi`, `-07-semi`, `-05-semi` are the same steps at 30% alpha,
+for layers that must show what is beneath.
 
-**One paint per frame.** The budget is roughly 10ms of the 16.6ms at 60Hz, and
-half that at 120Hz. Coalesce high-frequency updates — pointer moves, socket
-messages, keystrokes — behind a scheduled flag and paint once; never call
-`render()` per incoming event. And when a long task has to run *while something
-is animating*, split it by time rather than by count: measure
-`performance.now()` against the frame start and yield with
-`requestAnimationFrame`, so the split tracks the frame instead of guessing at
-it.
+**Override** the plain var after importing, never `--color-*`:
 
-### Mechanics
+```css
+:root { --background: #ffffff; }
+.dark { --background: #0a0a0a; }
+```
 
-Enter *and* exit in pure CSS, no mount flag:
+`:root` declares, `.dark` only overrides — a token introduced only in `.dark`
+is invalid in light mode. `.dark` sets `color-scheme: dark`, so it works on a
+subtree, and `light-dark()` follows it.
+
+**New palette:** derive the steps in OKLCH (lightness −12 / −22 / −30%, chroma
+×0.9 / 0.7 / 0.6), eyeball, commit hex.
+
+---
+
+## 3. Motion
+
+Enter and exit in CSS, no mount flag:
 
 ```css
 dialog {
-    opacity: 1;
     transition: opacity var(--duration-enter) var(--ease-entrance),
                 display var(--duration-enter) allow-discrete;
 }
@@ -343,189 +194,96 @@ dialog {
 dialog:not([open]) { opacity: 0; }
 ```
 
-`@starting-style` supplies the "before" state an element has never had, and
-`transition-behavior: allow-discrete` keeps `display` around until the exit
-finishes — together they replace the `isOpen` / `isClosing` state pair that
-usually drives this.
+`motion.css` ships the keyframes in §6's list. Under reduced motion it
+redefines them as opacity-only and clamps the `animate-modal-*` utilities to
+`--duration-micro`; app-level durations must clamp themselves. The modal
+utilities are keyframe-based and animate blur — kept for `kkrll-next`; new
+modals use `<dialog>` as above.
 
-Custom properties are not animatable until they are typed. `@property` fixes
-that, which is what makes gradient and shadow animation possible at all:
-
-```css
-@property --glow { syntax: "<color>"; inherits: false; initial-value: transparent; }
-```
-
-View transitions are wired **per project** — transition names are
-app-specific. Map these keyframes onto your own names; always guard with
-`@media (prefers-reduced-motion: no-preference)`.
-
-### Reduced motion
-
-**Reduce ≠ remove.** Stripping all motion hides state changes; the point is to
-remove vestibular triggers, not feedback.
-
-| | Under `prefers-reduced-motion: reduce` |
-|---|---|
-| Travel / translate | → 0. Element appears in place. |
-| Scale, parallax, spin | Removed entirely. |
-| Opacity | **Kept**, clamped to `--duration-micro`. |
-| Colour and border | Kept, unchanged. |
-| Auto-playing loops | Stopped. |
-
-Every state change keeps *some* transition, however brief, so the change stays
-perceptible. Write the reduced case as the branch you author, not as an
-afterthought appended to the file.
-
-`motion.css` implements this for every keyframe it ships: under `reduce` the
-travel keyframes are redefined as opacity-only and the `animate-modal-*`
-utilities clamp to `--duration-micro`. Redefining a `@keyframes` inside a media
-query replaces the earlier definition wholesale, so consumers inherit the
-policy without touching their call sites. App-level animation still has to opt
-in for itself.
+Long work during an animation: split by time, not count — check
+`performance.now()` against the frame start, yield with
+`requestAnimationFrame`.
 
 ---
 
-## 4. Modern CSS
-
-Reach for these before reaching for JavaScript. Each one below replaces
-something one of the four projects currently does by hand.
+## 4. Platform
 
 | Use | Instead of |
 |---|---|
-| `@starting-style` + `allow-discrete` | mount/unmount flags for enter-exit |
-| `:has()` | a parent `className` set from a child's state |
-| `@container` | `useDebounce` on resize to pick a layout |
-| `interpolate-size: allow-keywords` | measuring `scrollHeight` to animate open |
-| `field-sizing: content` | an input that resizes via JS |
-| `text-wrap: balance` / `pretty` | manual `<br>` and orphan-hunting |
-| `popover` + `[popovertarget]` | a portal, a focus trap and an outside-click listener |
-| `light-dark()` | a duplicated `.dark` block *for one-off values only* |
+| `@starting-style` + `allow-discrete` | mount/unmount flags |
+| `:has()` | a parent class set from a child's state |
+| `@container` | a resize listener picking a layout |
+| `interpolate-size: allow-keywords` | measuring `scrollHeight` |
+| `field-sizing: content` | JS-resized inputs |
+| `text-wrap: balance` / `pretty` | manual `<br>` |
+| `popover` + `[popovertarget]` | portal, focus trap, outside-click listener |
+| `showModal()` | `role="dialog"` + `aria-modal` on a `<div>` |
 
-Two cautions. `light-dark()` reads `color-scheme`, not `.dark`, so it will
-**not** follow a class toggle on a subtree — local values only, never
-`tokens.css`. And `corner-shape` degrades silently to plain `border-radius`,
-so never gate layout on it.
+`corner-shape: superellipse(1.333)` is global and degrades to a plain radius.
+Never gate layout on it.
 
 ---
 
-## 5. Shape & spacing
+## 5. Voice
 
-- **Spacing:** 8px base. `8 / 16 / 24 / 32` covers nearly everything. 24px is
-  the default gutter, and matches the motion travel distance.
-- **Radii:** `8px` for controls, `24px` for large surfaces (modals, sheets),
-  `100rem` for pills. Nested corners are concentric — an inner radius is the
-  outer radius minus the padding between them, so a `24px` panel with `16px`
-  of padding holds an `8px` child. Anything else reads as a mistake even when
-  nobody can say why.
-- **Corners:** `corner-shape: superellipse(1.333)` globally — continuous
-  curvature, closer to a drawn corner than to an arc.
-- **Rules:** hairlines are `--background-05` (or `--foreground-03` on dark
-  ground). One weight only. A second rule weight means the hierarchy should
-  have been expressed with space instead.
+The library ships font **roles**; each project assigns families.
 
----
+| Project | Voice | Sans | Serif | Mono |
+|---|---|---|---|---|
+| `good-looking` (The Bicycle42) | **Mono** | Supreme | Sentient | JetBrains Mono |
+| `you-live-like-this` | **Mono** | Supreme | Sentient | JetBrains Mono |
+| `kkrll-next` | **Sans** | Geist | Recia | Geist Mono |
+| `dbd` | **Serif** | Geist | Sentient | JetBrains Mono |
 
-## 6. References
+Mono where the content is instrumental, serif where people read for minutes.
+In a mono-voiced app, label vs. content is told by material and position, not
+case.
 
-### Lineage
-
-| | |
-|---|---|
-| [Rauno Freiberg — Interaction Guidelines](https://interactions.rauno.me) | The rigour: interaction rules stated as rules, with reasons |
-| [Emil Kowalski — animations.dev](https://animations.dev) | Motion craft, easing, interruptibility (§3) |
-| [Jhey Tompkins](https://jhey.dev) | Modern CSS as first resort rather than last (§4) |
-| [Vercel Geist](https://vercel.com/geist) | Token architecture, the ramp-as-contract idea |
-
-### The board
-
-`references/` holds the visual source. What it argues, strongest first:
-
-1. **Monospace as a full voice** — setting whole pages, not just code and
-   labels. The board is heavier on mono than most of these projects should be;
-   an available register, not a default. See §2.
-2. **The printed document** — section numbers, page numbers, dot leaders,
-   asterisk rules. Furniture that says a thing was *typeset*.
-3. **Data as ornament** — coordinates, FCC IDs, durations, specifications, set
-   as decoration and aligned in columns. Never behind a "details" toggle.
-4. **Warm paper or near-black**, nothing between.
-5. **One accent, used once.** Punctuation, not a palette.
-6. **Softness only at the controls.** Pills and blur belong to things you
-   touch; structure stays square and ruled.
+`kkrll-next`: never redeclare `--font-geist-sans` in CSS — it shadows
+next/font's hashed name and silently falls back.
 
 ---
 
-## 7. Accessible by default
+## 6. Check
 
-Most of this is free if you take "prefer the platform" (§0) seriously — the platform
-ships focus management, semantics and keyboard handling, and every hand-rolled
-replacement loses some of it.
+```bash
+bunx kkrll-check src
+```
 
-- **Contrast** — see §1. The dark ramp is the one that bites.
-- **Focus must be visible.** Never `outline: none` without a replacement.
-  `:focus-visible` gives keyboard users a ring and leaves mouse users alone;
-  that is the whole reason it exists, so there is no reason to suppress it.
-- **Elements before roles.** `<button>`, `<dialog>`, `<nav>`, `<a href>`. A
-  `<div role="button" tabIndex={0} onKeyDown={…}>` is four things to get wrong
-  in place of one that is already right — and `role="dialog"` + `aria-modal`
-  on a `<div>` still gives you no top layer, no focus trap and no inert
-  background, all of which `showModal()` hands over for free.
-- **Headings are an outline, not a size picker.** Never skip a level to get
-  smaller text. `base.css` sets no heading sizes precisely so this stays a
-  markup decision.
-- **Hit targets** are 44px minimum on touch, padding included.
-- **Reduced motion** — see §3. Reduce, do not remove.
-- **Never colour alone.** State that is only a hue is state some readers do not
-  have; pair it with an icon, a rule, weight or position.
+Prints `file:line rule text` for every ✓ rule in §0 and exits 1. Exempt a line
+only with a reason: `kkrll-ignore: <why>`. Exemptions are counted in every run;
+`--exempt` lists them with their reasons — read that list in review. Positive
+letter-spacing, a wide tracking utility, or tracking hidden in a `var()`
+cannot be exempted.
 
----
+It cannot see the rest. Before done, look once for each:
 
-## 8. What ships
+- a string that could be deleted (1–5)
+- two kinds of button, or one action split across places (26–27)
+- text under 24px in `-07` on dark, or any text on a raised surface (21)
+- a second accent (19)
+- motion with no origin, or on first paint (29–30)
 
-`theme.css` is the barrel; `tokens.css` alone works without Tailwind.
+Projects on `strict.css` cannot compile the forbidden Tailwind defaults at
+all; arbitrary values (`text-[10px]`) still need the check.
 
-| | |
-|---|---|
-| **Colour** | `--background` / `--foreground` × `-07` `-05` `-03`; `--background-semi`, `--background-07-semi`, `--background-05-semi`; `--overlay`, `--overlay-dark`; `--brand-light`, `--brand-dark`, `--brand-text`, `--brand-bg` |
-| **Type roles** | `--font-sans-stack`, `--font-mono-stack`, `--font-serif-stack` → `font-sans` / `font-mono` / `font-serif` |
-| **Motion** | `--duration-micro` `-exit` `-enter` `-slow`; `--ease-entrance` `-exit` `-micro` `-spring` |
-| **Keyframes** | `fadeIn`, `fadeOut`, `fadeInFromBottom`, `fadeOutToBottom`, `fadeOutToTop`, `fadeInToLeft`, `fadeOutToLeft`, `fadeInToRight`, `fadeOutToRight`, `modalOpen`, `modalClose`, `modalOverlayOpen`, `modalOverlayClose` |
-| **Utilities** | `animate-modal-open` / `-close` / `-overlay-open` / `-overlay-close`; `no-scrollbar`, `thin-scrollbar` |
-| **Base elements** | `body`, `p`, `a`, `h1`–`h3` (`text-wrap` only), `button:hover`, `::selection`, global `corner-shape` |
-
-Keyframes are shipped bare and unbound — the **names** of view transitions are
-app-specific, so mapping them is each project's job (§3). Check this table
-before writing another `fadeIn`.
-
-> Tailwind v4 tree-shakes unused `@theme` variables. A token you reference only
-> from JS or a template string will not be in the output; one plain
-> `var(--token)` anywhere in your CSS keeps it alive.
+**Ships:** colour ramps and `-semi` steps, `--overlay`, `--brand-*` · type
+scale · font roles · motion tokens · keyframes `fadeIn` `fadeOut`
+`fadeInFromBottom` `fadeOutToBottom` `fadeOutToTop` `fadeInToLeft`
+`fadeOutToLeft` `fadeInToRight` `fadeOutToRight` `modalOpen` `modalClose`
+`modalOverlayOpen` `modalOverlayClose` · `animate-modal-*` · `no-scrollbar`
+`thin-scrollbar`. Check here before writing another `fadeIn`.
 
 ---
 
-## 9. Rejected
+## 7. References
 
-Not stylistic preferences — each is something one of these projects shipped,
-and each has a replacement above.
+[Rauno Freiberg](https://interactions.rauno.me) (rules with reasons) ·
+[Emil Kowalski](https://animations.dev) (motion) ·
+[Jhey Tompkins](https://jhey.dev) (CSS first) ·
+[Vercel Geist](https://vercel.com/geist) (the ramp as contract).
 
-| Don't | Because | Instead |
-|---|---|---|
-| `shadow-2xl`, or any shadow for structure | Depth is not hierarchy | A hairline (§0) |
-| `rounded-[56px]`, `rounded-[44px]` | Off-grid, and breaks nesting | 8 / 24 / `100rem` (§5) |
-| `duration-300`, `ease-out` at call sites | Retuning means grepping | Motion tokens (§3) |
-| `setTimeout` matched to a CSS duration | Two sources of truth; they drift | `onAnimationEnd` / `transitionend` |
-| Hand-built modals, dropdowns, tooltips | Loses the top layer, focus trap, Escape | `<dialog>`, `popover` (§4) |
-| `role="button"` on a `<div>` | Reimplements `<button>`, worse | The element (§7) |
-| Lining figures in a column of numbers | Columns fail to align; reads rendered | `tabular-nums` (§2) |
-| Faint text via `-05` / `-03` on dark | 2.2:1 and 1.7:1 — not low-emphasis, gone | Change size or weight (§1) |
-| Introducing a token inside `.dark` | Invalid-at-computed-value in light: the fill silently does not paint, while the ink chosen *for* it stays — white on white | `:root` declares, `.dark` only overrides (§1) |
-| `aria-pressed` for a filled look on a one-shot action | Announces a switch that never switches | A class, and a timer (§7) |
-| `render()` / `update()` per incoming event | Many paints inside one frame | Coalesce behind a scheduled flag (§3) |
-| React state that only toggles a class | The platform already tracks it | `:has()`, `@starting-style` (§4) |
-| Entrance animation on first paint | Delays content to decorate it | Animate on change (§3) |
-| A second hairline weight | Hierarchy wanted space, not another rule | Space (§5) |
-| Mid-grey grounds | Belongs to no one | Two grounds (§0) |
-
----
-
-Migration notes for the individual projects live in the
-[README](https://github.com/kkrll/kkrll-design#migration).
+`references/` is the board — a mood, not a mandate: printed-document
+furniture, data set as ornament, warm paper or near-black, one accent,
+softness only at the controls. It argues for more mono than most of these
+projects should use.
