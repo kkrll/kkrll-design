@@ -20,6 +20,11 @@ Tailwind v4 projects (`kkrll-next`, `good-looking`, `you-live-like-this`):
 /* your palette override + app-specific classes below */
 ```
 
+Or `strict.css` in place of `theme.css` — the same, minus Tailwind's
+defaults that design.md forbids (`text-sm`, `tracking-wide`, `shadow-lg`,
+`text-red-500`, `ease-out`), so they fail to compile. Use it once a project
+has migrated.
+
 Projects without Tailwind (`dbd`) take tokens alone — the `@theme` block is
 skipped as an unknown at-rule:
 
@@ -33,11 +38,24 @@ Order matters: **after** `tailwindcss`, **before** your overrides.
 
 | File | Contents |
 |---|---|
-| `theme.css` | Barrel — imports all three below |
-| `tokens.css` | Colour ramps, type roles, `@theme` mapping |
+| `theme.css` | Barrel — tokens, base, motion |
+| `strict.css` | Barrel — `reset.css` first, then the same three |
+| `reset.css` | Deletes forbidden Tailwind defaults. Internal: order matters |
+| `tokens.css` | Colour ramps, type scale, font roles, motion timing, `@theme` mapping |
 | `base.css` | Element defaults + `no-scrollbar` / `thin-scrollbar` utilities |
-| `motion.css` | Durations, easings, keyframes, `animate-modal-*` utilities |
-| `references/` | Visual source for the house style (see design.md §6) |
+| `motion.css` | Keyframes, `animate-modal-*` utilities, reduced-motion policy |
+| `bin/check.js` | `kkrll-check` — finds design.md §0 violations |
+| `references/` | Visual source for the house style (see design.md §7) |
+
+## Check
+
+```bash
+bunx kkrll-check src        # file:line rule text; exits 1 on any finding
+```
+
+Run it at the end of every pass, not just in review. Exempt a line only with a
+reason: `kkrll-ignore: <why>`; `--exempt` lists every exemption. Positive
+letter-spacing cannot be exempted.
 
 ## Local development
 
@@ -79,7 +97,7 @@ push to `main` and `bun update @kkrll/design` picks it up. Pin a tag
 | Project | To do |
 |---|---|
 | `kkrll-next` | **Done.** Canonical. Keeps app-specific classes (`.nice-button`, `.px-default`, `.grid-1-to-3`, `.h-hero`) and its view-transition block. |
-| `good-looking` | Fix inverted background ramp (design.md §1). Alias `fade-in`/`fade-out` → `fadeIn`/`fadeOut`. Override palette to neutral. Keep `.markdown`, `--grid-template-columns-main`, `--breakpoint-xl`. |
+| `good-looking` | Fix inverted background ramp: `-05` (`#f5f5f5`) sits closer to base than `-07` (`#e5e5e5`). Alias `fade-in`/`fade-out` → `fadeIn`/`fadeOut`. Override palette to neutral. Keep `.markdown`, `--grid-template-columns-main`, `--breakpoint-xl`. |
 | `you-live-like-this` | Same as good-looking, minus `.markdown`. Keep the `.tok-*` DSL editor tokens. |
 | `dbd` | No Tailwind — import `tokens.css` only. Its journal aliases (`--bg`, `--ink`, `--muted`, `--rule`) already map onto the ramp; keep them. |
 

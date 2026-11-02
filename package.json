@@ -1,14 +1,18 @@
 {
   "name": "@kkrll/design",
   "version": "0.1.0",
-  "description": "Shared design tokens for kkrll projects — colour ramps, type roles, motion.",
+  "description": "Shared design tokens for kkrll projects — colour ramps, type scale, motion — and the check that enforces them.",
   "license": "MIT",
   "type": "module",
   "sideEffects": [
     "*.css"
   ],
+  "bin": {
+    "kkrll-check": "./bin/check.js"
+  },
   "exports": {
     "./theme.css": "./theme.css",
+    "./strict.css": "./strict.css",
     "./tokens.css": "./tokens.css",
     "./base.css": "./base.css",
     "./motion.css": "./motion.css",
@@ -17,9 +21,12 @@
   },
   "files": [
     "theme.css",
+    "strict.css",
+    "reset.css",
     "tokens.css",
     "base.css",
     "motion.css",
-    "design.md"
+    "design.md",
+    "bin"
   ]
 }

@@ -1,0 +1,13 @@
+/*
+ * theme.css with Tailwind's forbidden defaults removed. Use INSTEAD of
+ * theme.css, after tailwindcss:
+ *     @import "tailwindcss";
+ *     @import "@kkrll/design/strict.css";
+ *
+ * Arbitrary values (text-[10px], tracking-[.1em]) still compile — that is
+ * what `kkrll-check` is for.
+ */
+@import "./reset.css";
+@import "./tokens.css";
+@import "./base.css";
+@import "./motion.css";

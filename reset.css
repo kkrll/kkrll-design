@@ -1,0 +1,19 @@
+/*
+ * Deletes Tailwind's defaults that design.md forbids, so they do not compile:
+ * the palette (text-red-500, bg-white), the stock type sizes (text-sm),
+ * every tracking-* utility, shadows, and the stock easings (ease-out).
+ *
+ * Must load AFTER tailwindcss and BEFORE tokens.css — a reset deletes every
+ * variable in its namespace declared so far, ours included. strict.css gets
+ * the order right; import that, not this.
+ */
+@theme {
+    --color-*: initial;
+    --text-*: initial;
+    --tracking-*: initial;
+    --shadow-*: initial;
+    --inset-shadow-*: initial;
+    --drop-shadow-*: initial;
+    --text-shadow-*: initial;
+    --ease-*: initial;
+}
